@@ -32,7 +32,7 @@
     "cn-chars": "0.1.x",
     "prettify-pinyin": "0.1.x",
     "sequelize": "^2.0.0-rc1",
-    "sqlite3": "^3.0.2",
+    "sqlite3": "^4.0.0",
     "underscore": "^1.7.0"
   }
 }
