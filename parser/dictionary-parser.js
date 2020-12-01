@@ -1,77 +1,63 @@
-// I used this script to generate ../db/cc-cedict.sqlite
-// CC-CEDICT version as of October 6, 2014
-// see ../src/cc-cedict.txt for more details
+// Generates ../db/cc-cedict.sqlite from ../src/cc-cedict.txt
+const Sequelize = require('sequelize');
+const fs = require('fs');
+const sqlite = require('sqlite3');
 
-var Sequelize = require('sequelize');
-var sqlite = require('sqlite3');
-var fs = require('fs');
-
-// defined db config
-var sequelize = new Sequelize(null, null, null, {
+// DB config.
+const sequelize = new Sequelize(null, null, null, {
   dialect: 'sqlite',
   storage: '../db/cc-cedict.sqlite'
 });
 
-// create a sqlite database with every entry 
-var Word = sequelize.define('Word', {
+// create a sqlite database with every entry
+const Word = sequelize.define('Word', {
   traditional: Sequelize.STRING,
   simplified: Sequelize.STRING,
   pronunciation: Sequelize.STRING,
   definitions: Sequelize.STRING
 });
 
-// sync up the schema
+// Sync schema.
 sequelize
-  .sync({ force: true })
-  .complete(function(err) {
-     if (!!err) {
-       console.log('An error occurred while creating the table:', err);
-     } else {
-       console.log('It worked!');
+  .sync({force: true})
+  .complete(err => {
+     if (err) {
+       console.log('Error creating table', err);
+       return;
      }
+
+     console.log('Database initialized.');
+
+    const data = fs.readFileSync('../src/cc-cedict.txt', 'UTF-8' );
+    const lines = data.toString().split('\n');
+    console.log('Dictionary loaded, executing parser.');
+    addToDB(lines).then(() => console.log('Finished!')).catch(console.error);
   });
 
-fs.readFile('../src/cc-cedict.txt', 'UTF-8', function(err, data){
-  
-  console.log('dictionary loaded, now executing parser');
-  var lines = data.toString().split('\n');
-  var i = 0;
+async function addToDB (lines) {
+  const regex = /\[(.*?)\]/;
 
-  var addNextRow = function(){
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
 
-    var line = lines[i];
+    // Comment.
+    if (!line.length) { continue; }
+    if (line[0] === '#'){ continue; }
 
-    // not a comment
-    if (line[0] !== '#'){
-      var spaceSplit = line.split(' ');
-      var traditional = spaceSplit[0];
-      var simplified = spaceSplit[1];
+    const spaceSplit = line.split(' ');
+    const traditional = spaceSplit[0];
+    const simplified = spaceSplit[1];
 
-      var regex = /\[(.*?)\]/;
-      var pronunciation = line.match(regex)[0];
+    const pronunciation = line.match(regex)[0];
 
-      var slashSplit = line.split('/');
-      var defs = slashSplit.slice(1, slashSplit.length - 1).join('; ');
+    const slashSplit = line.split('/');
+    const defs = slashSplit.slice(1, slashSplit.length - 1).join(';');
 
-      console.log(pronunciation);
-
-      var word = Word.create({
-        traditional: traditional,
-        simplified: simplified,
-        pronunciation: pronunciation,
-        definitions: defs
-      });
-    }
-
-    setTimeout(function(){
-      if (i < lines.length){
-        i += 1;
-        addNextRow();
-      } else {
-        return;
-      }
-    }, 50);
-  };
-  addNextRow();
-});
-
+    await Word.create({
+      traditional: traditional,
+      simplified: simplified,
+      pronunciation: pronunciation,
+      definitions: defs
+    });
+  }
+}
