@@ -1,7 +1,7 @@
 {
   "name": "coupling-dict-chinese",
-  "version": "0.1.2",
-  "description": "Node.js Interface for CC-CEDICT",
+  "version": "1.0.0",
+  "description": "Node interface for the CC-CEDICT Chinese dictionary.",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/johnheroy/node-cc-cedict.git"
+    "url": "https://github.com/learncoupling/coupling-chinese-dict.git"
   },
   "keywords": [
     "Chinese",
@@ -21,10 +21,6 @@
   ],
   "author": "John Heroy <johnheroy@gmail.com> (http://johnheroy.com/)",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/johnheroy/node-cc-cedict/issues"
-  },
-  "homepage": "https://github.com/johnheroy/node-cc-cedict",
   "devDependencies": {
     "mocha": "1.21.x"
   },
